@@ -1,0 +1,44 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependency Directories
+node_modules/
+dist/
+dist-ssr/
+*.local
+
+# Editor and IDEs
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.ipynb_checkpoints/
+
+# Environments and Virtual Envs
+.venv/
+
+# Databases
+*.db
+*.sqlite3
+
+# Python & Caches
+__pycache__/
+*.pyc
+backend/__pycache__/
+
+# Project Specific (Data / Uploads / AI Models)
+backend/uploads/
+backend/models/
+*.pkl
+*.csv
