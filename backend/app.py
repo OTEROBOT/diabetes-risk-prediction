@@ -9,6 +9,9 @@ from auth import auth, token_required
 from upload import upload_api
 from train import train_api
 from dashboard import dashboard_api
+from history import history_api
+from training_history import training_history_api
+from models_api import models_api
 
 app = Flask(__name__)
 CORS(app)
@@ -17,6 +20,9 @@ app.register_blueprint(auth)
 app.register_blueprint(upload_api)
 app.register_blueprint(train_api)
 app.register_blueprint(dashboard_api)
+app.register_blueprint(history_api)
+app.register_blueprint(training_history_api)
+app.register_blueprint(models_api)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -74,6 +80,27 @@ def predict():
     probability = float(
         model.predict_proba(sample)[0][1]
     )
+
+    conn = get_db()
+
+    cursor = conn.cursor()
+
+    cursor.execute("""
+    INSERT INTO prediction_history(
+        user_id,
+        prediction,
+        risk
+    )
+    VALUES(?,?,?)
+    """,(
+        None,
+        prediction,
+        probability * 100
+    ))
+
+    conn.commit()
+
+    conn.close()
 
     return jsonify({
 
