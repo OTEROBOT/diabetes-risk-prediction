@@ -34,15 +34,10 @@ def load_active_model():
     cursor = conn.cursor()
 
     cursor.execute("""
-
         SELECT model_name, filepath
-
         FROM models
-
         WHERE is_active = 1
-
         LIMIT 1
-
     """)
 
     row = cursor.fetchone()
@@ -52,7 +47,7 @@ def load_active_model():
     if row is None:
         return None, None
 
-    model = joblib.load(row["filepath"])BASE_DIR = Path(__file__).resolve().parent
+    model = joblib.load(row["filepath"])
 
     return model, row["model_name"]
 
