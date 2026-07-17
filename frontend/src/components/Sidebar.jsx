@@ -30,7 +30,7 @@ function Sidebar() {
                     Training History
                 </Link>
 
-                <Link to="/history" className="block hover:text-cyan-400">
+                <Link to="/prediction-history" className="block hover:text-cyan-400">
                     Prediction History
                 </Link>
 
