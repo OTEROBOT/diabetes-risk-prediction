@@ -28,11 +28,33 @@ app.register_blueprint(models_api)
 app.register_blueprint(delete_model_api)
 app.register_blueprint(activate_model_api)
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+def load_active_model():
 
-model = joblib.load(
-    BASE_DIR / "ml" / "models" / "diabetes_model.pkl"
-)
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+
+        SELECT model_name, filepath
+
+        FROM models
+
+        WHERE is_active = 1
+
+        LIMIT 1
+
+    """)
+
+    row = cursor.fetchone()
+
+    conn.close()
+
+    if row is None:
+        return None, None
+
+    model = joblib.load(row["filepath"])BASE_DIR = Path(__file__).resolve().parent
+
+    return model, row["model_name"]
 
 FEATURES = [
     "HighBP",
@@ -79,6 +101,14 @@ def predict():
         "Age": data["Age"],
     }])
 
+    model, model_name = load_active_model()
+
+    if model is None:
+
+        return jsonify({
+            "message": "No active model"
+        }),404
+
     prediction = int(model.predict(sample)[0])
 
     probability = float(
@@ -108,13 +138,15 @@ def predict():
 
     return jsonify({
 
-        "prediction": prediction,
+    "model": model_name,
 
-        "probability": probability,
+    "prediction": prediction,
 
-        "risk": round(probability * 100, 2)
+    "probability": probability,
 
-    })
+    "risk": round(probability * 100, 2)
+
+})
 
 
 # ===========================
