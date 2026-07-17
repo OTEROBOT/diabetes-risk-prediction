@@ -47,6 +47,12 @@ def models():
 
             "auc": round(row["auc"],4),
 
+            "cv_accuracy": (
+                round(row["cv_accuracy"],4)
+                if row["cv_accuracy"] is not None
+                else None
+            ),
+
             "filepath": row["filepath"]
 
         })

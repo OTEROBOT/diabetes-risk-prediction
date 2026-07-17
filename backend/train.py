@@ -32,6 +32,8 @@ from sklearn.model_selection import StratifiedKFold
 
 from sklearn.model_selection import cross_val_score
 
+from pathlib import Path
+
 train_api = Blueprint("train_api", __name__)
 
 FEATURES = [
@@ -63,7 +65,9 @@ def train_model():
     split = float(data["split"])
     use_smote = data["smote"]
 
-    filepath = os.path.join("uploads", dataset)
+    BASE_DIR = Path(__file__).resolve().parent
+
+    filepath = BASE_DIR / "uploads" / dataset
 
     df = pd.read_csv(filepath)
 
@@ -122,9 +126,9 @@ def train_model():
         }), 400
         
         
-        # =====================
-        # K-Fold Cross Validation
-        # =====================
+    # =====================
+    # K-Fold Cross Validation
+    # =====================
 
     kfold = int(data.get("kfold",0))
 
@@ -206,14 +210,17 @@ def train_model():
 
     
     
-    os.makedirs("models", exist_ok=True)
+    
+
+    BASE_DIR = Path(__file__).resolve().parent
+
+    MODELS_DIR = BASE_DIR / "models"
+
+    MODELS_DIR.mkdir(exist_ok=True)
 
     model_name = algorithm.replace(" ", "_") + ".pkl"
 
-    model_path = os.path.join(
-        "models",
-        model_name
-    )
+    model_path = MODELS_DIR / model_name
 
     joblib.dump(
         model,
@@ -240,7 +247,7 @@ def train_model():
         f1,
         roc,
         cv_accuracy,
-        model_path
+        str(model_path)
     ))
     
     conn.commit()
@@ -261,7 +268,11 @@ def train_model():
 
     "roc_auc": round(roc,4),
 
-    "cv_accuracy": round(cv_accuracy,4) if cv_accuracy else None,
+        "cv_accuracy": (
+                round(cv_accuracy,4)
+                if cv_accuracy is not None
+                else None
+        ),
 
     "model_path": model_path
 
