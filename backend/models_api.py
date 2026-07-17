@@ -52,8 +52,10 @@ def models():
                 if row["cv_accuracy"] is not None
                 else None
             ),
-
-            "filepath": row["filepath"]
+            
+            "filepath": row["filepath"],
+            
+            "is_active": row["is_active"]
 
         })
 

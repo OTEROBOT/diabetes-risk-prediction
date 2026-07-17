@@ -13,6 +13,7 @@ from history import history_api
 from training_history import training_history_api
 from models_api import models_api
 from delete_model import delete_model_api
+from activate_model import activate_model_api
 
 app = Flask(__name__)
 CORS(app)
@@ -25,6 +26,7 @@ app.register_blueprint(history_api)
 app.register_blueprint(training_history_api)
 app.register_blueprint(models_api)
 app.register_blueprint(delete_model_api)
+app.register_blueprint(activate_model_api)
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
