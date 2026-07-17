@@ -50,6 +50,8 @@ def training_history():
             "f1": round(row["f1"],4),
 
             "auc": round(row["auc"],4),
+            
+            "cv_accuracy": round(row["cv_accuracy"],4),
 
             "created_at": row["created_at"]
 

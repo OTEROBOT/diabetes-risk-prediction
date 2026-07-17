@@ -28,6 +28,10 @@ from imblearn.over_sampling import SMOTE
 
 from database import get_db
 
+from sklearn.model_selection import StratifiedKFold
+
+from sklearn.model_selection import cross_val_score
+
 train_api = Blueprint("train_api", __name__)
 
 FEATURES = [
@@ -116,6 +120,35 @@ def train_model():
         return jsonify({
             "message": "Unknown Algorithm"
         }), 400
+        
+        
+        # =====================
+        # K-Fold Cross Validation
+        # =====================
+
+    kfold = int(data.get("kfold",0))
+
+    cv_accuracy = None
+
+    if kfold > 1:
+
+        skf = StratifiedKFold(
+            n_splits=kfold,
+            shuffle=True,
+            random_state=42
+        )
+
+        scores = cross_val_score(
+            model,
+            X,
+            y,
+            cv=skf,
+            scoring="accuracy"
+        )
+
+        cv_accuracy = scores.mean()
+        
+        
 
     # Train
     model.fit(
@@ -146,16 +179,19 @@ def train_model():
 
     cursor.execute("""
     INSERT INTO training_history(
-        algorithm,
-        train_ratio,
-        smote,
-        accuracy,
-        precision,
-        recall,
-        f1,
-        auc
+
+    algorithm,
+    train_ratio,
+    smote,
+    accuracy,
+    precision,
+    recall,
+    f1,
+    auc,
+    cv_accuracy
+
     )
-    VALUES(?,?,?,?,?,?,?,?)
+    VALUES(?,?,?,?,?,?,?,?,?)
     """, (
         algorithm,
         split,
@@ -164,7 +200,8 @@ def train_model():
         precision,
         recall,
         f1,
-        roc
+        roc,
+        cv_accuracy
     ))
 
     
@@ -191,9 +228,10 @@ def train_model():
     recall,
     f1,
     auc,
+    cv_accuracy,
     filepath
     )
-    VALUES(?,?,?,?,?,?,?)
+    VALUES(?,?,?,?,?,?,?,?)
     """,(
         algorithm,
         accuracy,
@@ -201,6 +239,7 @@ def train_model():
         recall,
         f1,
         roc,
+        cv_accuracy,
         model_path
     ))
     
@@ -221,6 +260,8 @@ def train_model():
     "f1": round(f1,4),
 
     "roc_auc": round(roc,4),
+
+    "cv_accuracy": round(cv_accuracy,4) if cv_accuracy else None,
 
     "model_path": model_path
 

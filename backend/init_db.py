@@ -1,6 +1,11 @@
+from pathlib import Path
 import sqlite3
 
-conn = sqlite3.connect("diabetes.db")
+BASE_DIR = Path(__file__).resolve().parent
+
+DATABASE = BASE_DIR / "diabetes.db"
+
+conn = sqlite3.connect(DATABASE)
 cursor = conn.cursor()
 
 # ==========================================
@@ -49,6 +54,7 @@ CREATE TABLE IF NOT EXISTS models(
     recall REAL,
     f1 REAL,
     auc REAL,
+    cv_accuracy REAL,
     filepath TEXT,
     is_active INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -73,6 +79,7 @@ CREATE TABLE IF NOT EXISTS training_history(
     recall REAL,
     f1 REAL,
     auc REAL,
+    cv_accuracy REAL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(dataset_id) REFERENCES datasets(id),
     FOREIGN KEY(model_id) REFERENCES models(id)
