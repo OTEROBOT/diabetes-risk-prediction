@@ -64,10 +64,12 @@ def train_model():
     algorithm = data["algorithm"]
     split = float(data["split"])
     use_smote = data["smote"]
+    
 
     BASE_DIR = Path(__file__).resolve().parent
-
+    
     filepath = BASE_DIR / "uploads" / dataset
+
 
     df = pd.read_csv(filepath)
 
@@ -212,7 +214,7 @@ def train_model():
     
     
 
-    BASE_DIR = Path(__file__).resolve().parent
+    
 
     MODELS_DIR = BASE_DIR / "models"
 
@@ -274,6 +276,6 @@ def train_model():
                 else None
         ),
 
-    "model_path": model_path
+    "model_path": model_name
 
 })
