@@ -94,3 +94,31 @@ def upload_dataset():
         "columns":columns
 
     })
+    
+    
+    
+    # ==========================
+# GET DATASETS
+# ==========================
+
+@upload_api.route("/datasets", methods=["GET"])
+def get_datasets():
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT
+            id,
+            filename,
+            rows,
+            columns
+        FROM datasets
+        ORDER BY id DESC
+    """)
+
+    datasets = cursor.fetchall()
+
+    conn.close()
+
+    return jsonify([dict(row) for row in datasets])

@@ -1,7 +1,12 @@
 import axios from "axios";
-import API from "./api";
 
-export const predict = async (data) => {
-    const res = await axios.post(`${API}/predict`, data);
-    return res.data;
-};
+const API = "http://127.0.0.1:5000";
+
+export async function getPredictionHistory() {
+
+    const response = await axios.get(
+        `${API}/prediction_history`
+    );
+
+    return response.data;
+}
