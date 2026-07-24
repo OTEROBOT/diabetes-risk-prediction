@@ -14,6 +14,10 @@ function Sidebar() {
                     Dashboard
                 </Link>
 
+                <Link to="/upload" className="block hover:text-cyan-400">
+                    Upload Dataset
+                </Link>
+
                 <Link to="/predict" className="block hover:text-cyan-400">
                     Predict
                 </Link>

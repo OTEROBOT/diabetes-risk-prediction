@@ -6,6 +6,7 @@ import Train from "./pages/Train";
 import Models from "./pages/Models";
 import TrainingHistory from "./pages/TrainingHistory";
 import PredictionHistory from "./pages/PredictionHistory";
+import Upload from "./pages/Upload";
 
 function App() {
 
@@ -18,6 +19,11 @@ function App() {
         <Route
           path="/"
           element={<Dashboard />}
+        />
+
+        <Route
+          path="/upload"
+          element={<Upload />}
         />
 
         <Route
