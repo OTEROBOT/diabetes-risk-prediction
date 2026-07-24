@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from database import get_db
 import pandas as pd
 import os
+from flask import send_file
 
 upload_api = Blueprint("upload_api", __name__)
 
@@ -60,24 +61,47 @@ def upload_dataset():
     conn = get_db()
 
     cursor = conn.cursor()
+    
+    cursor.execute(
+        "SELECT id FROM datasets WHERE filename=?",
+        (filename,)
+    )
+
+    exists = cursor.fetchone()
+
+    if exists:
+
+        conn.close()
+
+        return jsonify({
+
+            "message": "Dataset already exists"
+
+        }),400
 
     cursor.execute("""
 
         INSERT INTO datasets
-
-        (filename,rows,columns)
+        (
+            filename,
+            filepath,
+            rows,
+            columns
+        )
 
         VALUES
+        (
+            ?, ?, ?, ?
+        )
 
-        (?,?,?)
+        """, (
 
-    """, (
+            filename,
+            filepath,
+            rows,
+            columns
 
-        filename,
-        rows,
-        columns
-
-    ))
+        ))
 
     conn.commit()
 
@@ -122,3 +146,73 @@ def get_datasets():
     conn.close()
 
     return jsonify([dict(row) for row in datasets])
+
+
+
+# ==========================
+# DELETE DATASET
+# ==========================
+
+@upload_api.route("/datasets/<int:dataset_id>", methods=["DELETE"])
+def delete_dataset(dataset_id):
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT filepath FROM datasets WHERE id=?",
+        (dataset_id,)
+    )
+
+    dataset = cursor.fetchone()
+
+    if dataset is None:
+        conn.close()
+        return jsonify({
+            "message": "Dataset not found"
+        }), 404
+
+    filepath = dataset["filepath"]
+
+    if os.path.exists(filepath):
+        os.remove(filepath)
+
+    cursor.execute(
+        "DELETE FROM datasets WHERE id=?",
+        (dataset_id,)
+    )
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({
+        "message": "Dataset deleted successfully"
+    })
+    
+    
+    
+    
+    
+@upload_api.route("/download_dataset/<int:dataset_id>")
+def download_dataset(dataset_id):
+
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute(
+        "SELECT filename, filepath FROM datasets WHERE id=?",
+        (dataset_id,)
+    )
+
+    dataset = cursor.fetchone()
+
+    conn.close()
+
+    if not dataset:
+        return jsonify({"message": "Dataset not found"}),404
+
+    return send_file(
+        dataset["filepath"],
+        as_attachment=True,
+        download_name=dataset["filename"]
+    )

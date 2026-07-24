@@ -1,63 +1,83 @@
+import { useEffect, useState } from "react";
+
 import {
     Chart as ChartJS,
-    ArcElement,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
     Tooltip,
     Legend,
 } from "chart.js";
 
-import { Pie } from "react-chartjs-2";
+import { Bar } from "react-chartjs-2";
 
 ChartJS.register(
-    ArcElement,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
     Tooltip,
     Legend
 );
 
-function DashboardChart({ dashboard }) {
+function DashboardChart() {
+
+    const [chartData, setChartData] = useState([]);
+
+    useEffect(() => {
+
+        fetch("http://127.0.0.1:5000/dashboard_chart")
+            .then((res) => res.json())
+            .then((data) => {
+
+                setChartData(data);
+
+            })
+            .catch((err) => {
+
+                console.error(err);
+
+            });
+
+    }, []);
 
     const data = {
 
-        labels: [
+        labels: chartData.map((item, index) => {
 
-            "Predictions",
+            return `${item.model_name} ${index + 1}`;
 
-            "Models",
-
-            "Datasets",
-
-            "Users"
-
-        ],
+        }),
 
         datasets: [
 
             {
 
-                data: [
+                label: "Accuracy (%)",
 
-                    dashboard.predictions,
+                data: chartData.map((item) => (
 
-                    dashboard.models,
+                    (item.accuracy * 100).toFixed(2)
 
-                    dashboard.datasets,
-
-                    dashboard.users
-
-                ],
+                )),
 
                 backgroundColor: [
 
-                    "#ef4444",
-
-                    "#8b5cf6",
-
-                    "#22c55e",
-
-                    "#3b82f6"
+                    "#3B82F6",
+                    "#10B981",
+                    "#F59E0B",
+                    "#EF4444",
+                    "#8B5CF6",
+                    "#06B6D4",
+                    "#EC4899",
+                    "#84CC16",
+                    "#F97316",
+                    "#6366F1"
 
                 ],
 
-                borderWidth: 1,
+                borderRadius: 8,
 
             }
 
@@ -65,19 +85,83 @@ function DashboardChart({ dashboard }) {
 
     };
 
+    const options = {
+
+        responsive: true,
+
+        maintainAspectRatio: false,
+
+        plugins: {
+
+            legend: {
+
+                display: true,
+
+            },
+
+            title: {
+
+                display: true,
+
+                text: "Model Accuracy Comparison",
+
+                font: {
+
+                    size: 20
+
+                }
+
+            }
+
+        },
+
+        scales: {
+
+            y: {
+
+                beginAtZero: true,
+
+                max: 100,
+
+                ticks: {
+
+                    callback: function (value) {
+
+                        return value + "%";
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    };
+
     return (
 
-        <div className="bg-white rounded-xl shadow-lg p-6">
+        <>
 
-            <h2 className="text-xl font-bold mb-5">
+            <h2 className="text-2xl font-bold mb-5">
 
-                System Statistics
+                Accuracy Comparison
 
             </h2>
 
-            <Pie data={data} />
+            <div className="h-[450px]">
 
-        </div>
+                <Bar
+
+                    data={data}
+
+                    options={options}
+
+                />
+
+            </div>
+
+        </>
 
     );
 

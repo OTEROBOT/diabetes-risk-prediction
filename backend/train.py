@@ -22,7 +22,7 @@ from sklearn.ensemble import RandomForestClassifier
 
 from sklearn.neighbors import KNeighborsClassifier
 
-from sklearn.svm import SVC
+from sklearn.svm import LinearSVC
 
 from imblearn.over_sampling import SMOTE
 
@@ -117,9 +117,10 @@ def train_model():
 
     elif algorithm == "SVM":
 
-        model = SVC(
-            probability=True
-        )
+        model = LinearSVC(
+            random_state=42,
+            max_iter=5000
+    )
 
     else:
 
@@ -166,7 +167,14 @@ def train_model():
     y_pred = model.predict(X_test)
 
     # Probability
-    y_prob = model.predict_proba(X_test)[:, 1]
+
+    if hasattr(model, "predict_proba"):
+
+        y_prob = model.predict_proba(X_test)[:,1]
+
+    else:
+
+        y_prob = model.decision_function(X_test)
 
     # Metrics
     accuracy = accuracy_score(y_test, y_pred)
