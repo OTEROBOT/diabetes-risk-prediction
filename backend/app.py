@@ -115,17 +115,19 @@ def predict():
     cursor = conn.cursor()
 
     cursor.execute("""
-    INSERT INTO prediction_history(
-        user_id,
-        prediction,
-        risk
-    )
-    VALUES(?,?,?)
-    """,(
-        None,
-        prediction,
-        probability * 100
-    ))
+        INSERT INTO prediction_history(
+            user_id,
+            prediction,
+            risk,
+            model_name
+        )
+        VALUES(?,?,?,?)
+        """,(
+            None,
+            prediction,
+            probability * 100,
+            model_name
+        ))
 
     conn.commit()
 

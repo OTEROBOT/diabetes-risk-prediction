@@ -3,6 +3,7 @@ from database import get_db
 
 history_api = Blueprint("history_api", __name__)
 
+
 @history_api.route("/prediction_history")
 def prediction_history():
 
@@ -10,9 +11,15 @@ def prediction_history():
     cursor = conn.cursor()
 
     cursor.execute("""
-    SELECT *
-    FROM prediction_history
-    ORDER BY created_at DESC
+        SELECT
+            id,
+            user_id,
+            model_name,
+            prediction,
+            risk,
+            created_at
+        FROM prediction_history
+        ORDER BY created_at DESC
     """)
 
     rows = cursor.fetchall()
@@ -22,12 +29,21 @@ def prediction_history():
     result = []
 
     for row in rows:
+
         result.append({
+
             "id": row["id"],
+
             "user_id": row["user_id"],
+
+            "model_name": row["model_name"],
+
             "prediction": row["prediction"],
+
             "risk": round(row["risk"], 2),
+
             "created_at": row["created_at"]
+
         })
 
     return jsonify(result)
