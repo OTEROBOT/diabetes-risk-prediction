@@ -1,47 +1,101 @@
-import { Link } from "react-router-dom";
+import {
+  FaHome,
+  FaDatabase,
+  FaHeartbeat,
+  FaRobot,
+  FaBrain,
+  FaHistory,
+  FaChartBar,
+} from "react-icons/fa";
+
+import { NavLink } from "react-router-dom";
 
 function Sidebar() {
-    return (
-        <div className="w-64 h-screen bg-slate-900 text-white p-5">
+  const menuClass = ({ isActive }) =>
+    `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
+    ${
+      isActive
+        ? "bg-cyan-500 text-white shadow-lg"
+        : "text-gray-300 hover:bg-slate-800 hover:text-cyan-400"
+    }`;
 
-            <h1 className="text-2xl font-bold mb-8">
-                Diabetes System
-            </h1>
+  return (
+    <aside className="fixed left-0 top-0 w-64 h-screen bg-slate-900 shadow-2xl flex flex-col">
 
-            <nav className="space-y-3">
+      {/* Logo */}
+      <div className="p-6 border-b border-slate-700">
 
-                <Link to="/" className="block hover:text-cyan-400">
-                    Dashboard
-                </Link>
+        <h1 className="text-2xl font-bold text-white">
+          🩺 Diabetes AI
+        </h1>
 
-                <Link to="/upload" className="block hover:text-cyan-400">
-                    Upload Dataset
-                </Link>
+        <p className="text-gray-400 text-sm mt-2">
+          Prediction System
+        </p>
 
-                <Link to="/predict" className="block hover:text-cyan-400">
-                    Predict
-                </Link>
+      </div>
 
-                <Link to="/train" className="block hover:text-cyan-400">
-                    Train Model
-                </Link>
+      {/* Menu */}
 
-                <Link to="/models" className="block hover:text-cyan-400">
-                    Models
-                </Link>
+      <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
 
-                <Link to="/training-history" className="block hover:text-cyan-400">
-                    Training History
-                </Link>
+        <NavLink to="/" end className={menuClass}>
+          <FaHome />
+          <span>Dashboard</span>
+        </NavLink>
 
-                <Link to="/prediction-history" className="block hover:text-cyan-400">
-                    Prediction History
-                </Link>
+        <NavLink to="/upload" className={menuClass}>
+          <FaDatabase />
+          <span>Upload Dataset</span>
+        </NavLink>
 
-            </nav>
+        <NavLink to="/predict" className={menuClass}>
+          <FaHeartbeat />
+          <span>Predict</span>
+        </NavLink>
 
+        <NavLink to="/train" className={menuClass}>
+          <FaRobot />
+          <span>Train Model</span>
+        </NavLink>
+
+        <NavLink to="/models" className={menuClass}>
+          <FaBrain />
+          <span>Models</span>
+        </NavLink>
+
+        <NavLink to="/training-history" className={menuClass}>
+          <FaChartBar />
+          <span>Training History</span>
+        </NavLink>
+
+        <NavLink to="/prediction-history" className={menuClass}>
+          <FaHistory />
+          <span>Prediction History</span>
+        </NavLink>
+
+      </nav>
+
+      {/* Footer */}
+
+      <div className="border-t border-slate-700 p-5">
+
+        <div className="text-white font-semibold">
+          👤 Administrator
         </div>
-    );
+
+        <div className="text-gray-400 text-sm mt-1">
+          Diabetes Prediction System
+        </div>
+
+        <div className="text-gray-500 text-xs mt-2">
+          Version 1.0
+        </div>
+
+      </div>
+
+    </aside>
+  );
 }
 
 export default Sidebar;

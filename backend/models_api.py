@@ -19,7 +19,7 @@ def models():
 
     FROM models
 
-    ORDER BY id DESC
+    ORDER BY accuracy DESC
 
     """)
 
