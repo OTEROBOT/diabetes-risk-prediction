@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
+import DashboardChart from "../components/DashboardChart";
 import {
   FaRobot,
   FaHeartbeat,
@@ -336,38 +337,9 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* ===================== Model Accuracy ===================== */}
+      {/* ===================== Model Accuracy Chart ===================== */}
       <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-        <h3 className="text-xl font-bold text-slate-800 mb-6">
-          Model Accuracy Comparison
-        </h3>
-
-        {dashboard.model_accuracies?.length > 0 ? (
-          <div className="space-y-4">
-            {dashboard.model_accuracies.map((model, index) => (
-              <div key={index}>
-                <div className="flex justify-between mb-1.5">
-                  <span className="font-medium text-slate-700">
-                    {model.name}
-                  </span>
-                  <span className="font-bold text-slate-800">
-                    {(model.accuracy * 100).toFixed(2)}%
-                  </span>
-                </div>
-                <div className="w-full h-3.5 bg-gray-200 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full transition-all duration-700"
-                    style={{ width: `${model.accuracy * 100}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-10 text-gray-400">
-            No model accuracy data available
-          </div>
-        )}
+        <DashboardChart />
       </div>
 
       {/* ===================== Active Model Banner ===================== */}

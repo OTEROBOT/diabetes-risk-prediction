@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify
 from database import get_db
 from datetime import date
-
+#dashboard.py
 dashboard_api = Blueprint("dashboard_api", __name__)
 
 
@@ -20,7 +20,7 @@ def dashboard():
     """)
     counts = cursor.fetchone()
 
-    # 2. Active Model (เพิ่ม precision, recall, f1, cv_accuracy)
+    # 2. Active Model
     cursor.execute("""
         SELECT 
             model_name, 
@@ -36,7 +36,7 @@ def dashboard():
     """)
     active = cursor.fetchone()
 
-    # 3. Best Model (accuracy สูงสุด)
+    # 3. Best Model
     cursor.execute("""
         SELECT model_name, accuracy
         FROM models
@@ -63,7 +63,7 @@ def dashboard():
     """)
     risk = cursor.fetchone()
 
-    # 6. Recent Predictions (5 รายการล่าสุด)
+    # 6. Recent Predictions
     cursor.execute("""
         SELECT 
             id,
@@ -77,7 +77,7 @@ def dashboard():
     """)
     recent = cursor.fetchall()
 
-    # 7. Model Accuracies (สำหรับกราฟ)
+    # 7. Model Accuracies
     cursor.execute("""
         SELECT 
             model_name as name,
@@ -96,7 +96,6 @@ def dashboard():
         "models": counts["models"] if counts else 0,
         "predictions": counts["predictions"] if counts else 0,
         
-        # Active Model Metrics
         "active_model": active["model_name"] if active else None,
         "accuracy": active["accuracy"] if active else None,
         "precision": active["precision"] if active else None,
@@ -130,3 +129,23 @@ def dashboard():
             for row in model_acc
         ] if model_acc else []
     })
+
+
+@dashboard_api.route("/dashboard_chart")
+def dashboard_chart():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT 
+            model_name,
+            MAX(accuracy) AS accuracy
+        FROM models
+        GROUP BY model_name
+        ORDER BY accuracy DESC
+    """)
+    
+    rows = cursor.fetchall()
+    conn.close()
+
+    return jsonify([dict(row) for row in rows])

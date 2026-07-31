@@ -1,11 +1,21 @@
+// frontend/src/pages/PredictionHistory.jsx
+
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
+import {
+  FaHeartbeat,
+  FaExclamationTriangle,
+  FaCheckCircle,
+  FaRobot,
+} from "react-icons/fa";
 
 function PredictionHistory() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
 
   const loadHistory = async () => {
+    setLoading(true);
     try {
       const res = await fetch("http://127.0.0.1:5000/prediction_history");
       const data = await res.json();
@@ -21,148 +31,241 @@ function PredictionHistory() {
     loadHistory();
   }, []);
 
+  // ===== Summary =====
+  const total = history.length;
+  const highRisk = history.filter((item) => item.prediction === 1).length;
+  const lowRisk = history.filter((item) => item.prediction === 0).length;
+  const latestModel = history.length > 0 ? history[0].model_name : "-";
+
+  // ===== Filter =====
+  const filteredHistory = history.filter((item) => {
+    const keyword = search.toLowerCase();
+    return (
+      String(item.id).includes(keyword) ||
+      (item.model_name || "").toLowerCase().includes(keyword)
+    );
+  });
+
+  // ===== Risk Color =====
+  const getRiskColor = (risk) => {
+    if (risk == null) return "text-gray-500";
+    if (risk >= 90) return "text-red-700 font-bold";
+    if (risk >= 70) return "text-red-600 font-bold";
+    if (risk >= 50) return "text-orange-500 font-bold";
+    return "text-green-600 font-bold";
+  };
+
+  const getRiskBarColor = (risk) => {
+    if (risk == null) return "bg-gray-400";
+    if (risk >= 90) return "bg-red-700";
+    if (risk >= 70) return "bg-red-500";
+    if (risk >= 50) return "bg-orange-400";
+    return "bg-green-500";
+  };
+
+  // ===== Loading =====
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex flex-col items-center justify-center h-64 gap-4">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-500 text-lg">Loading Prediction History...</p>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
-
-      <h1 className="text-3xl font-bold mb-6">
-        Prediction History
-      </h1>
-
-      <div className="bg-white rounded-xl shadow-lg overflow-x-auto">
-
-        <table className="w-full">
-
-          <thead className="bg-slate-800 text-white">
-
-            <tr>
-
-              <th className="p-3">No.</th>
-
-              <th className="p-3">ID</th>
-
-              <th className="p-3">Model</th>
-
-              <th className="p-3">Prediction</th>
-
-              <th className="p-3">Risk</th>
-
-              <th className="p-3">Probability</th>
-
-              <th className="p-3">Date</th>
-
-            </tr>
-
-          </thead>
-
-          <tbody>
-
-            {loading ? (
-
-              <tr>
-
-                <td
-                  colSpan="7"
-                  className="text-center p-10 text-gray-500"
-                >
-                  Loading...
-                </td>
-
-              </tr>
-
-            ) : history.length === 0 ? (
-
-              <tr>
-
-                <td
-                  colSpan="7"
-                  className="text-center p-10 text-gray-500"
-                >
-                  No Prediction History
-                </td>
-
-              </tr>
-
-            ) : (
-
-              history.map((item, index) => (
-
-                <tr
-                  key={item.id}
-                  className="border-b hover:bg-gray-50 text-center"
-                >
-
-                  <td className="p-3">
-                    {index + 1}
-                  </td>
-
-                  <td className="p-3">
-                    {item.id}
-                  </td>
-
-                  <td className="p-3 font-medium">
-                    {item.model_name}
-                  </td>
-
-                  <td className="p-3">
-
-                    {item.prediction === 1 ? (
-
-                      <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full font-semibold">
-                        High Risk
-                      </span>
-
-                    ) : (
-
-                      <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full font-semibold">
-                        Low Risk
-                      </span>
-
-                    )}
-
-                  </td>
-
-                  <td className="p-3">
-
-                    <span
-                      className={
-                        item.risk >= 50
-                          ? "text-red-600 font-bold"
-                          : "text-green-600 font-bold"
-                      }
-                    >
-                      {item.risk}%
-                    </span>
-
-                  </td>
-
-                  <td className="p-3">
-
-                    {item.probability
-                      ? `${(item.probability * 100).toFixed(2)}%`
-                      : "-"}
-
-                  </td>
-
-                  <td className="p-3">
-
-                    {item.created_at
-                      ? new Date(item.created_at).toLocaleString()
-                      : "-"}
-
-                  </td>
-
-                </tr>
-
-              ))
-
-            )}
-
-          </tbody>
-
-        </table>
-
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-slate-800">
+          Prediction History
+        </h1>
+        <p className="text-gray-500 mt-2">
+          View all prediction records generated by the AI model.
+        </p>
       </div>
 
+      {/* ===================== Summary Cards ===================== */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+        {/* Total */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-gray-500 text-sm font-medium">
+                Prediction All Time
+              </p>
+              <h2 className="text-4xl font-bold mt-2 text-blue-600">
+                {total}
+              </h2>
+            </div>
+            <div className="bg-blue-100 p-3 rounded-xl">
+              <FaHeartbeat size={24} className="text-blue-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* High Risk */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-gray-500 text-sm font-medium">High Risk</p>
+              <h2 className="text-4xl font-bold mt-2 text-red-600">
+                {highRisk}
+              </h2>
+            </div>
+            <div className="bg-red-100 p-3 rounded-xl">
+              <FaExclamationTriangle size={24} className="text-red-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* Low Risk */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-gray-500 text-sm font-medium">Low Risk</p>
+              <h2 className="text-4xl font-bold mt-2 text-green-600">
+                {lowRisk}
+              </h2>
+            </div>
+            <div className="bg-green-100 p-3 rounded-xl">
+              <FaCheckCircle size={24} className="text-green-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* Latest Model */}
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="text-gray-500 text-sm font-medium">Latest Model</p>
+              <h2 className="text-xl font-bold mt-2 text-purple-600 leading-tight">
+                {latestModel}
+              </h2>
+            </div>
+            <div className="bg-purple-100 p-3 rounded-xl">
+              <FaRobot size={24} className="text-purple-600" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ===================== Search ===================== */}
+      <div className="mb-6">
+        <input
+          type="text"
+          placeholder="Search by ID or Model..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="w-full md:w-80 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+      </div>
+
+      {/* ===================== Table ===================== */}
+      <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-slate-800 text-white uppercase tracking-wide text-sm">
+              <tr>
+                <th className="p-4 text-left">#</th>
+                <th className="p-4 text-left">ID</th>
+                <th className="p-4 text-left">Model</th>
+                <th className="p-4 text-center">Prediction</th>
+                <th className="p-4 text-center">Risk</th>
+                <th className="p-4 text-center">Date</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {filteredHistory.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="6"
+                    className="text-center p-16 text-gray-500"
+                  >
+                    <div className="flex flex-col items-center gap-3">
+                      <span className="text-5xl">📄</span>
+                      <p className="text-lg font-medium">
+                        No Prediction History
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        Make your first prediction.
+                      </p>
+                    </div>
+                  </td>
+                </tr>
+              ) : (
+                filteredHistory.map((item, index) => (
+                  <tr
+                    key={item.id}
+                    className="border-b border-gray-100 hover:bg-blue-50 text-center transition"
+                  >
+                    <td className="p-4 text-left text-gray-600">
+                      {index + 1}
+                    </td>
+
+                    <td className="p-4 text-left font-medium">
+                      #{item.id}
+                    </td>
+
+                    <td className="p-4 text-left font-semibold text-slate-800">
+                      {item.model_name || "-"}
+                    </td>
+
+                    <td className="p-4">
+                      {item.prediction === 1 ? (
+                        <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-sm font-semibold">
+                          High Risk
+                        </span>
+                      ) : (
+                        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm font-semibold">
+                          Low Risk
+                        </span>
+                      )}
+                    </td>
+
+                    {/* Risk + Progress Bar */}
+                    <td className="p-4">
+                      <div className="flex flex-col items-center gap-1.5">
+                        <span className={getRiskColor(item.risk)}>
+                          {item.risk != null ? `${item.risk}%` : "-"}
+                        </span>
+
+                        {item.risk != null && (
+                          <div className="w-28 bg-gray-200 rounded-full h-2">
+                            <div
+                              className={`h-2 rounded-full transition-all duration-500 ${getRiskBarColor(
+                                item.risk
+                              )}`}
+                              style={{ width: `${Math.min(item.risk, 100)}%` }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </td>
+
+                    <td className="p-4 text-sm text-gray-500">
+                      {item.created_at
+                        ? new Date(
+                            item.created_at.replace(" ", "T")
+                          ).toLocaleString("th-TH", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            year: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "-"}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </Layout>
   );
 }

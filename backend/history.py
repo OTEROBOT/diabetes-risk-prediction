@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 from database import get_db
-
+#history.py
 history_api = Blueprint("history_api", __name__)
 
 
@@ -23,27 +23,18 @@ def prediction_history():
     """)
 
     rows = cursor.fetchall()
-
     conn.close()
 
     result = []
 
     for row in rows:
-
         result.append({
-
             "id": row["id"],
-
             "user_id": row["user_id"],
-
             "model_name": row["model_name"],
-
             "prediction": row["prediction"],
-
-            "risk": round(row["risk"], 2),
-
+            "risk": round(row["risk"], 2) if row["risk"] is not None else None,
             "created_at": row["created_at"]
-
         })
 
     return jsonify(result)
