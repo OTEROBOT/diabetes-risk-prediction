@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
 import DashboardChart from "../components/DashboardChart";
+import RiskPieChart from "../components/RiskPieChart";
+import PredictionTrendChart from "../components/PredictionTrendChart";
 import {
   FaRobot,
   FaHeartbeat,
@@ -14,6 +16,7 @@ import {
   FaTrophy,
   FaClock,
 } from "react-icons/fa";
+
 
 function Dashboard() {
   const [dashboard, setDashboard] = useState({
@@ -337,10 +340,21 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* ===================== Model Accuracy Chart ===================== */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-        <DashboardChart />
-      </div>
+          {/* ===================== Charts Section ===================== */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+              {/* Bar Chart */}
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <DashboardChart />
+              </div>
+
+            {/* Pie Chart */}
+            <RiskPieChart />
+          </div>
+
+            {/* Line Chart */}
+            <div className="mb-8">
+              <PredictionTrendChart />
+            </div>
 
       {/* ===================== Active Model Banner ===================== */}
       <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl shadow-xl p-8 text-white mb-8">

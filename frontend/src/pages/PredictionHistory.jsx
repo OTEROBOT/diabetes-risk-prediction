@@ -9,9 +9,12 @@ import {
   FaRobot,
   FaFileCsv,
   FaFileExcel,
+  FaFilePdf,
 } from "react-icons/fa";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 function PredictionHistory() {
   const [history, setHistory] = useState([]);
@@ -139,6 +142,57 @@ function PredictionHistory() {
     saveAs(blob, "prediction_history.xlsx");
   };
 
+  // ===== Export PDF =====
+  const exportPDF = () => {
+    if (history.length === 0) {
+      alert("No prediction history.");
+      return;
+    }
+
+    const doc = new jsPDF();
+
+    // Title
+    doc.setFontSize(16);
+    doc.text("Prediction History", 14, 15);
+
+    // Date generated
+    doc.setFontSize(10);
+    doc.text(
+      `Generated: ${new Date().toLocaleString("th-TH")}`,
+      14,
+      22
+    );
+
+    // Table
+    const tableData = history.map((item, index) => [
+      index + 1,
+      item.id,
+      item.model_name || "-",
+      item.prediction === 1 ? "High Risk" : "Low Risk",
+      item.risk != null ? `${item.risk}%` : "-",
+      item.created_at || "-",
+    ]);
+
+    autoTable(doc, {
+      startY: 28,
+      head: [["#", "ID", "Model", "Prediction", "Risk", "Date"]],
+      body: tableData,
+      styles: {
+        fontSize: 9,
+        cellPadding: 3,
+      },
+      headStyles: {
+        fillColor: [30, 41, 59], // slate-800
+        textColor: 255,
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252],
+      },
+    });
+
+    doc.save("prediction_history.pdf");
+  };
+
   // ===== Loading =====
   if (loading) {
     return (
@@ -238,7 +292,7 @@ function PredictionHistory() {
           className="w-full md:w-80 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
 
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={exportCSV}
             className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-xl font-semibold transition"
@@ -253,6 +307,14 @@ function PredictionHistory() {
           >
             <FaFileExcel />
             Export Excel
+          </button>
+
+          <button
+            onClick={exportPDF}
+            className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-3 rounded-xl font-semibold transition"
+          >
+            <FaFilePdf />
+            Export PDF
           </button>
         </div>
       </div>

@@ -149,3 +149,30 @@ def dashboard_chart():
     conn.close()
 
     return jsonify([dict(row) for row in rows])
+
+@dashboard_api.route("/prediction_trend")
+def prediction_trend():
+    conn = get_db()
+    cursor = conn.cursor()
+
+    cursor.execute("""
+        SELECT 
+            DATE(created_at) as date,
+            COUNT(*) as count
+        FROM prediction_history
+        GROUP BY DATE(created_at)
+        ORDER BY date ASC
+    """)
+
+    rows = cursor.fetchall()
+    conn.close()
+
+    result = [
+        {
+            "date": row["date"],
+            "count": row["count"]
+        }
+        for row in rows
+    ]
+
+    return jsonify(result)
