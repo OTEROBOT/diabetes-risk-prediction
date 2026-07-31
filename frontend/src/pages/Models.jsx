@@ -116,7 +116,7 @@ function Models() {
   return (
     <Layout>
       {/* Header */}
-      <div className="mb-8">
+      <div className="mb-6">
         <h1 className="text-4xl font-bold text-slate-800">
           Machine Learning Models
         </h1>
@@ -124,6 +124,28 @@ function Models() {
           Compare model performance and choose the active model used for
           diabetes prediction.
         </p>
+      </div>
+
+      {/* ===================== Notice / Explanation Banner ===================== */}
+      <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 mb-8 text-slate-700">
+        <div className="flex items-start gap-3">
+          <span className="text-blue-600 text-xl mt-0.5">ℹ️</span>
+          <div className="space-y-1 text-sm">
+            <p className="font-semibold text-blue-900 text-base">
+              คำอธิบายการจัดเรียงตารางและหมายเลข ID (Table Sorting & Model ID)
+            </p>
+            <ul className="list-disc list-inside space-y-1 text-slate-600 leading-relaxed">
+              <li>
+                <strong className="text-slate-800">การจัดเรียงตาราง:</strong>{" "}
+                โมเดลทั้งหมดจะถูกเรียงลำดับตามความแม่นยำ (<span className="text-blue-600 font-medium">Accuracy</span>) จากมากไปน้อยอัตโนมัติ เพื่อให้คุณเปรียบเทียบและเลือกใช้งานโมเดลที่มีประสิทธิภาพสูงที่สุดได้สะดวก
+              </li>
+              <li>
+                <strong className="text-slate-800">หมายเลข ID:</strong>{" "}
+                เป็นรหัสประจำตัวเฉพาะที่สร้างขึ้นตามลำดับการเทรนระบบ ตัวเลขจึงไม่อยู่ในลำดับ 1-2-3 เนื่องจากการเรียงประสิทธิภาพโมเดลและการลบโมเดลเดิมออกจากระบบ
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
 
       {/* ===================== Best Model Card ===================== */}

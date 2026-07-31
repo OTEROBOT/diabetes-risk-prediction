@@ -23,6 +23,7 @@ ChartJS.register(
 
 function DashboardChart() {
   const [chartData, setChartData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch("http://127.0.0.1:5000/dashboard_chart")
@@ -32,8 +33,25 @@ function DashboardChart() {
       })
       .catch((err) => {
         console.error(err);
-      });
+      })
+      .finally(() => setLoading(false));
   }, []);
+
+  // Empty State
+  if (!loading && chartData.length === 0) {
+    return (
+      <div>
+        <h2 className="text-2xl font-bold mb-5 text-slate-800">
+          Accuracy Comparison
+        </h2>
+        <div className="h-[450px] flex flex-col items-center justify-center text-gray-400">
+          <span className="text-5xl mb-4">📊</span>
+          <p className="text-lg font-medium text-gray-500">No Model Yet</p>
+          <p className="text-sm mt-1">Train your first model to see comparison.</p>
+        </div>
+      </div>
+    );
+  }
 
   const colors = [
     "#3B82F6",

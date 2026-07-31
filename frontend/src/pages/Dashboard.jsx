@@ -6,17 +6,15 @@ import Layout from "../components/Layout";
 import DashboardChart from "../components/DashboardChart";
 import RiskPieChart from "../components/RiskPieChart";
 import PredictionTrendChart from "../components/PredictionTrendChart";
+import SummaryCards from "../components/SummaryCards";
+import DashboardSkeleton from "../components/DashboardSkeleton";
 import {
-  FaRobot,
-  FaHeartbeat,
   FaUpload,
   FaCogs,
   FaStethoscope,
   FaList,
-  FaTrophy,
-  FaClock,
+  FaRobot,
 } from "react-icons/fa";
-
 
 function Dashboard() {
   const [dashboard, setDashboard] = useState({
@@ -24,46 +22,58 @@ function Dashboard() {
     datasets: 0,
     models: 0,
     predictions: 0,
-
     accuracy: 0,
     precision: 0,
     recall: 0,
     f1: 0,
     auc: 0,
     cv_accuracy: 0,
-
     active_model: "-",
     best_model: "-",
-
     prediction_today: 0,
-
     high_risk: 0,
     low_risk: 0,
-
     recent_predictions: [],
     model_accuracies: [],
   });
 
+  const [trendData, setTrendData] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const res = await fetch("http://127.0.0.1:5000/dashboard");
-        const data = await res.json();
-        setDashboard((prev) => ({
-          ...prev,
-          ...data,
-        }));
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const loadDashboard = async (showLoading = true) => {
+  if (showLoading) setLoading(true);
 
-    fetchDashboard();
-  }, []);
+  try {
+    const [dashboardRes, trendRes] = await Promise.all([
+      fetch("http://127.0.0.1:5000/dashboard"),
+      fetch("http://127.0.0.1:5000/prediction_trend"),
+    ]);
+
+    const dashboardData = await dashboardRes.json();
+    const trend = await trendRes.json();
+
+    setDashboard((prev) => ({
+      ...prev,
+      ...dashboardData,
+    }));
+    setTrendData(trend);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    if (showLoading) setLoading(false);
+  }
+};
+
+  useEffect(() => {
+  loadDashboard();
+
+  // Auto refresh ทุก 10 วินาที
+  const interval = setInterval(() => {
+    loadDashboard(false); // ไม่โชว์ skeleton ตอน auto refresh
+  }, 10000);
+
+  return () => clearInterval(interval);
+}, []);
 
   const formatPercentage = (value) => {
     if (value === null || value === undefined) return "0.00";
@@ -73,10 +83,7 @@ function Dashboard() {
   if (loading) {
     return (
       <Layout>
-        <div className="flex flex-col items-center justify-center h-64 gap-4">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-gray-500 text-lg">Loading Dashboard...</p>
-        </div>
+        <DashboardSkeleton />
       </Layout>
     );
   }
@@ -84,81 +91,31 @@ function Dashboard() {
   return (
     <Layout>
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-slate-800">
-          Diabetes Risk Prediction Dashboard
-        </h1>
-        <p className="text-gray-500 mt-2">
-          Overview of system performance and prediction statistics
-        </p>
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-bold text-slate-800">
+            Diabetes Risk Prediction Dashboard
+          </h1>
+          <p className="text-gray-500 mt-2">
+            Overview of system performance and prediction statistics
+          </p>
+        </div>
+
+        <button
+          onClick={() => {
+            setLoading(true);
+            loadDashboard();
+          }}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl font-semibold transition"
+        >
+          Refresh
+        </button>
       </div>
 
-      {/* ===================== Summary Cards ===================== */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
-        {/* Total Models */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-gray-500 text-sm font-medium">Total Models</p>
-              <h2 className="text-4xl font-bold mt-2 text-purple-600">
-                {dashboard.models ?? 0}
-              </h2>
-            </div>
-            <div className="bg-purple-100 p-3 rounded-xl">
-              <FaRobot size={28} className="text-purple-600" />
-            </div>
-          </div>
-        </div>
+      {/* Summary Cards */}
+      <SummaryCards data={dashboard} />
 
-        {/* Prediction Today */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-gray-500 text-sm font-medium">Prediction Today</p>
-              <h2 className="text-4xl font-bold mt-2 text-blue-600">
-                {dashboard.prediction_today ?? 0}
-              </h2>
-            </div>
-            <div className="bg-blue-100 p-3 rounded-xl">
-              <FaClock size={28} className="text-blue-600" />
-            </div>
-          </div>
-        </div>
-
-        {/* Total Predictions */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-gray-500 text-sm font-medium">
-                Prediction All Time
-              </p>
-              <h2 className="text-4xl font-bold mt-2 text-red-600">
-                {dashboard.predictions ?? 0}
-              </h2>
-            </div>
-            <div className="bg-red-100 p-3 rounded-xl">
-              <FaHeartbeat size={28} className="text-red-600" />
-            </div>
-          </div>
-        </div>
-
-        {/* Best Model */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition">
-          <div className="flex justify-between items-start">
-            <div>
-              <p className="text-gray-500 text-sm font-medium">Best Model</p>
-              <h2 className="text-xl font-bold mt-2 text-green-600 leading-tight">
-                {dashboard.best_model || dashboard.active_model || "-"}
-              </h2>
-            </div>
-            <div className="bg-green-100 p-3 rounded-xl">
-              <FaTrophy size={28} className="text-green-600" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ===================== Model Performance ===================== */}
+      {/* Model Performance */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-5 mb-8">
         <div className="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition">
           <p className="text-gray-500 text-sm">Accuracy</p>
@@ -203,9 +160,8 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* ===================== Two Columns: Recent + Distribution ===================== */}
+      {/* Recent + Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Recent Predictions */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
           <h3 className="text-xl font-bold text-slate-800 mb-5 flex items-center gap-2">
             <FaList className="text-blue-600" />
@@ -258,14 +214,12 @@ function Dashboard() {
           )}
         </div>
 
-        {/* Prediction Distribution */}
         <div className="bg-white rounded-2xl shadow-lg p-6">
           <h3 className="text-xl font-bold text-slate-800 mb-6">
             Prediction Distribution
           </h3>
 
           <div className="space-y-6">
-            {/* High Risk */}
             <div>
               <div className="flex justify-between mb-2">
                 <span className="font-medium text-red-600">High Risk</span>
@@ -287,7 +241,6 @@ function Dashboard() {
               </div>
             </div>
 
-            {/* Low Risk */}
             <div>
               <div className="flex justify-between mb-2">
                 <span className="font-medium text-green-600">Low Risk</span>
@@ -310,7 +263,6 @@ function Dashboard() {
             </div>
           </div>
 
-          {/* Summary */}
           <div className="mt-8 pt-6 border-t grid grid-cols-2 gap-4 text-center">
             <div>
               <p className="text-gray-500 text-sm">High Risk Rate</p>
@@ -340,23 +292,23 @@ function Dashboard() {
         </div>
       </div>
 
-          {/* ===================== Charts Section ===================== */}
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
-              {/* Bar Chart */}
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <DashboardChart />
-              </div>
+      {/* Charts */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+        <div className="bg-white rounded-2xl shadow-lg p-6">
+          <DashboardChart />
+        </div>
 
-            {/* Pie Chart */}
-            <RiskPieChart />
-          </div>
+        <RiskPieChart
+          highRisk={dashboard.high_risk || 0}
+          lowRisk={dashboard.low_risk || 0}
+        />
+      </div>
 
-            {/* Line Chart */}
-            <div className="mb-8">
-              <PredictionTrendChart />
-            </div>
+      <div className="mb-8">
+        <PredictionTrendChart trendData={trendData} />
+      </div>
 
-      {/* ===================== Active Model Banner ===================== */}
+      {/* Active Model Banner */}
       <div className="bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl shadow-xl p-8 text-white mb-8">
         <p className="uppercase tracking-widest text-sm opacity-90">
           Current AI Model
@@ -370,11 +322,9 @@ function Dashboard() {
         </p>
       </div>
 
-      {/* ===================== Quick Actions ===================== */}
+      {/* Quick Actions */}
       <div className="bg-white rounded-2xl shadow-lg p-6">
-        <h3 className="text-xl font-bold text-slate-800 mb-6">
-          Quick Actions
-        </h3>
+        <h3 className="text-xl font-bold text-slate-800 mb-6">Quick Actions</h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link

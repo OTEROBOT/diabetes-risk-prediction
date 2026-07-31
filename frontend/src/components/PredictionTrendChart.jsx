@@ -1,6 +1,5 @@
 // frontend/src/components/PredictionTrendChart.jsx
 
-import { useEffect, useState } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -25,17 +24,26 @@ ChartJS.register(
   Filler
 );
 
-function PredictionTrendChart() {
-  const [trendData, setTrendData] = useState([]);
-
-  useEffect(() => {
-    fetch("http://127.0.0.1:5000/prediction_trend")
-      .then((res) => res.json())
-      .then((data) => {
-        setTrendData(data);
-      })
-      .catch((err) => console.error(err));
-  }, []);
+function PredictionTrendChart({ trendData = [] }) {
+  // ===== Empty State =====
+  if (!trendData || trendData.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl shadow-lg p-6">
+        <h2 className="text-xl font-bold text-slate-800 mb-4">
+          Prediction Trend
+        </h2>
+        <div className="h-[400px] flex flex-col items-center justify-center text-gray-400">
+          <span className="text-5xl mb-4">📈</span>
+          <p className="text-lg font-medium text-gray-500">
+            No Prediction Yet
+          </p>
+          <p className="text-sm mt-1">
+            Start by making your first prediction.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const data = {
     labels: trendData.map((item) =>

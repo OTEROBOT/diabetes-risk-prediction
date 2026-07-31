@@ -1,5 +1,5 @@
 import Sidebar from "./Sidebar";
-
+//Layout.jsx
 function Layout({ children }) {
   return (
     <div className="bg-gray-100 min-h-screen">

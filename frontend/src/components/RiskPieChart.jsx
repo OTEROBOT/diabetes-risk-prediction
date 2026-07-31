@@ -1,6 +1,5 @@
 // frontend/src/components/RiskPieChart.jsx
 
-import { useEffect, useState } from "react";
 import {
   Chart as ChartJS,
   ArcElement,
@@ -11,19 +10,24 @@ import { Doughnut } from "react-chartjs-2";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-function RiskPieChart() {
-  const [highRisk, setHighRisk] = useState(0);
-  const [lowRisk, setLowRisk] = useState(0);
-
-  useEffect(() => {
-    fetch("http://127.0.0.1:5000/dashboard")
-      .then((res) => res.json())
-      .then((data) => {
-        setHighRisk(data.high_risk || 0);
-        setLowRisk(data.low_risk || 0);
-      })
-      .catch((err) => console.error(err));
-  }, []);
+function RiskPieChart({ highRisk = 0, lowRisk = 0 }) {
+  // ===== Empty State =====
+  if (highRisk === 0 && lowRisk === 0) {
+    return (
+      <div className="bg-white rounded-2xl shadow-lg p-6 h-full">
+        <h2 className="text-xl font-bold text-slate-800 mb-4">
+          Risk Distribution
+        </h2>
+        <div className="h-[350px] flex flex-col items-center justify-center text-gray-400">
+          <span className="text-5xl mb-4">🥧</span>
+          <p className="text-lg font-medium text-gray-500">No Prediction Yet</p>
+          <p className="text-sm mt-1">
+            Start by making your first prediction.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   const total = highRisk + lowRisk;
 
@@ -68,7 +72,6 @@ function RiskPieChart() {
     },
   };
 
-  // Plugin แสดงตัวเลขตรงกลาง
   const centerTextPlugin = {
     id: "centerText",
     beforeDraw: (chart) => {
