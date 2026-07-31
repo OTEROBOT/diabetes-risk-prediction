@@ -1,6 +1,6 @@
 from flask import Blueprint, jsonify
 from database import get_db
-from datetime import datetime, date
+from datetime import date
 
 dashboard_api = Blueprint("dashboard_api", __name__)
 
@@ -20,9 +20,16 @@ def dashboard():
     """)
     counts = cursor.fetchone()
 
-    # 2. Active Model
+    # 2. Active Model (เพิ่ม precision, recall, f1, cv_accuracy)
     cursor.execute("""
-        SELECT model_name, accuracy, auc
+        SELECT 
+            model_name, 
+            accuracy, 
+            precision, 
+            recall, 
+            f1, 
+            auc, 
+            cv_accuracy
         FROM models
         WHERE is_active = 1
         LIMIT 1
@@ -89,9 +96,14 @@ def dashboard():
         "models": counts["models"] if counts else 0,
         "predictions": counts["predictions"] if counts else 0,
         
+        # Active Model Metrics
         "active_model": active["model_name"] if active else None,
         "accuracy": active["accuracy"] if active else None,
+        "precision": active["precision"] if active else None,
+        "recall": active["recall"] if active else None,
+        "f1": active["f1"] if active else None,
         "auc": active["auc"] if active else None,
+        "cv_accuracy": active["cv_accuracy"] if active else None,
 
         "best_model": best["model_name"] if best else None,
         "prediction_today": today_count["count"] if today_count else 0,

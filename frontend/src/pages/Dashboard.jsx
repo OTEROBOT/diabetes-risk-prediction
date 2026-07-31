@@ -20,13 +20,22 @@ function Dashboard() {
     datasets: 0,
     models: 0,
     predictions: 0,
+
     accuracy: 0,
+    precision: 0,
+    recall: 0,
+    f1: 0,
     auc: 0,
+    cv_accuracy: 0,
+
     active_model: "-",
     best_model: "-",
+
     prediction_today: 0,
+
     high_risk: 0,
     low_risk: 0,
+
     recent_predictions: [],
     model_accuracies: [],
   });
@@ -145,25 +154,48 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* ===================== Accuracy Progress ===================== */}
-      <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="text-lg font-bold text-slate-700">Best Accuracy</h3>
-          <span className="text-2xl font-bold text-cyan-600">
+      {/* ===================== Model Performance ===================== */}
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-5 mb-8">
+        <div className="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition">
+          <p className="text-gray-500 text-sm">Accuracy</p>
+          <h2 className="text-3xl font-bold text-blue-600 mt-2">
             {formatPercentage(dashboard.accuracy)}%
-          </span>
+          </h2>
         </div>
-        <div className="w-full h-5 bg-gray-200 rounded-full overflow-hidden">
-          <div
-            className="h-full bg-gradient-to-r from-cyan-500 to-blue-600 transition-all duration-1000"
-            style={{
-              width: `${Math.min(Number(dashboard.accuracy || 0) * 100, 100)}%`,
-            }}
-          />
+
+        <div className="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition">
+          <p className="text-gray-500 text-sm">Precision</p>
+          <h2 className="text-3xl font-bold text-green-600 mt-2">
+            {formatPercentage(dashboard.precision)}%
+          </h2>
         </div>
-        <div className="flex justify-between text-xs text-gray-500 mt-1">
-          <span>0%</span>
-          <span>100%</span>
+
+        <div className="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition">
+          <p className="text-gray-500 text-sm">Recall</p>
+          <h2 className="text-3xl font-bold text-orange-600 mt-2">
+            {formatPercentage(dashboard.recall)}%
+          </h2>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition">
+          <p className="text-gray-500 text-sm">F1 Score</p>
+          <h2 className="text-3xl font-bold text-purple-600 mt-2">
+            {formatPercentage(dashboard.f1)}%
+          </h2>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition">
+          <p className="text-gray-500 text-sm">AUC</p>
+          <h2 className="text-3xl font-bold text-red-600 mt-2">
+            {formatPercentage(dashboard.auc)}%
+          </h2>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-lg p-6 text-center hover:shadow-xl transition">
+          <p className="text-gray-500 text-sm">Cross Validation</p>
+          <h2 className="text-3xl font-bold text-cyan-600 mt-2">
+            {formatPercentage(dashboard.cv_accuracy)}%
+          </h2>
         </div>
       </div>
 
@@ -205,7 +237,7 @@ function Dashboard() {
                         )}
                       </td>
                       <td className="py-3 font-semibold">
-                        {item.risk ? `${item.risk}%` : "-"}
+                        {item.risk ? `${Number(item.risk).toFixed(2)}%` : "-"}
                       </td>
                       <td className="py-3 text-gray-500 text-xs">
                         {item.created_at || "-"}
