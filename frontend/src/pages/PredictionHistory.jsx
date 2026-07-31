@@ -7,7 +7,11 @@ import {
   FaExclamationTriangle,
   FaCheckCircle,
   FaRobot,
+  FaFileCsv,
+  FaFileExcel,
 } from "react-icons/fa";
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
 
 function PredictionHistory() {
   const [history, setHistory] = useState([]);
@@ -61,6 +65,78 @@ function PredictionHistory() {
     if (risk >= 70) return "bg-red-500";
     if (risk >= 50) return "bg-orange-400";
     return "bg-green-500";
+  };
+
+  // ===== Export CSV =====
+  const exportCSV = () => {
+    if (history.length === 0) {
+      alert("No prediction history.");
+      return;
+    }
+
+    const headers = ["ID", "Model", "Prediction", "Risk (%)", "Date"];
+
+    const rows = history.map((item) => [
+      item.id,
+      item.model_name || "-",
+      item.prediction === 1 ? "High Risk" : "Low Risk",
+      item.risk != null ? item.risk : "-",
+      item.created_at || "-",
+    ]);
+
+    const csvContent =
+      "\uFEFF" +
+      [headers, ...rows]
+        .map((e) => e.join(","))
+        .join("\n");
+
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = url;
+    link.download = "prediction_history.csv";
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+  };
+
+  // ===== Export Excel =====
+  const exportExcel = () => {
+    if (history.length === 0) {
+      alert("No prediction history.");
+      return;
+    }
+
+    const data = history.map((item) => ({
+      ID: item.id,
+      Model: item.model_name || "-",
+      Prediction: item.prediction === 1 ? "High Risk" : "Low Risk",
+      "Risk (%)": item.risk != null ? item.risk : "-",
+      Date: item.created_at || "-",
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Prediction History");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    const blob = new Blob([excelBuffer], {
+      type: "application/octet-stream",
+    });
+
+    saveAs(blob, "prediction_history.xlsx");
   };
 
   // ===== Loading =====
@@ -152,8 +228,8 @@ function PredictionHistory() {
         </div>
       </div>
 
-      {/* ===================== Search ===================== */}
-      <div className="mb-6">
+      {/* ===================== Search + Export ===================== */}
+      <div className="mb-6 flex flex-col md:flex-row justify-between gap-4">
         <input
           type="text"
           placeholder="Search by ID or Model..."
@@ -161,6 +237,24 @@ function PredictionHistory() {
           onChange={(e) => setSearch(e.target.value)}
           className="w-full md:w-80 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
+
+        <div className="flex gap-3">
+          <button
+            onClick={exportCSV}
+            className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white px-5 py-3 rounded-xl font-semibold transition"
+          >
+            <FaFileCsv />
+            Export CSV
+          </button>
+
+          <button
+            onClick={exportExcel}
+            className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-3 rounded-xl font-semibold transition"
+          >
+            <FaFileExcel />
+            Export Excel
+          </button>
+        </div>
       </div>
 
       {/* ===================== Table ===================== */}
