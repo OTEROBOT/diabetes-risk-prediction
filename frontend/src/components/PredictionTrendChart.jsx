@@ -38,7 +38,12 @@ function PredictionTrendChart() {
   }, []);
 
   const data = {
-    labels: trendData.map((item) => item.date),
+    labels: trendData.map((item) =>
+      new Date(item.date).toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "short",
+      })
+    ),
     datasets: [
       {
         label: "Predictions",
