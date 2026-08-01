@@ -1,4 +1,4 @@
-// frontend/src/components/Sidebar.jsx
+// D:\IT29401 โครงงานทางเทคโนโลยีสารสนเทศ\ปี4เทอม1\diabetes-risk-prediction\frontend\src\components\Sidebar.jsx
 
 import {
   FaHome,
@@ -9,8 +9,10 @@ import {
   FaHistory,
   FaChartBar,
   FaInfoCircle,
+  FaNewspaper,
 } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
+import { FaBook } from "react-icons/fa";
 
 function Sidebar() {
   const menuClass = ({ isActive }) =>
@@ -70,6 +72,17 @@ function Sidebar() {
           <FaHistory />
           <span>Prediction History</span>
         </NavLink>
+
+        <NavLink to="/articles" className={menuClass}>
+          <FaNewspaper />
+          <span>Articles</span>
+        </NavLink>
+
+        <NavLink to="/knowledge" className={menuClass}>
+          <FaBook />
+          <span>Knowledge</span>
+        </NavLink>
+
       </nav>
 
       {/* Footer */}

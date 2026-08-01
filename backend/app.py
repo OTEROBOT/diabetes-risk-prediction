@@ -14,8 +14,11 @@ from training_history import training_history_api
 from models_api import models_api
 from delete_model import delete_model_api
 from activate_model import activate_model_api
+from article import article_bp
+from users_api import users_bp
 
 app = Flask(__name__)
+app.json.ensure_ascii = False
 CORS(app)
 
 app.register_blueprint(auth)
@@ -27,6 +30,9 @@ app.register_blueprint(training_history_api)
 app.register_blueprint(models_api)
 app.register_blueprint(delete_model_api)
 app.register_blueprint(activate_model_api)
+app.register_blueprint(article_bp)
+app.register_blueprint(users_bp)
+
 
 def load_active_model():
 

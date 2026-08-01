@@ -1,9 +1,11 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+//D:\IT29401 โครงงานทางเทคโนโลยีสารสนเทศ\ปี4เทอม1\diabetes-risk-prediction\frontend\src\pages\Login.jsx
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate();
 
   async function login(e) {
     e.preventDefault();
@@ -22,7 +24,7 @@ function Login() {
 
       alert("Login Success");
 
-      window.location.href = "/admin";
+      navigate("/");
     } catch (err) {
       alert(err.response?.data?.message || "Login Failed");
     }
