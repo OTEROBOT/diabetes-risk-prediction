@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Layout from "../components/Layout";
-
+//D:\IT29401 โครงงานทางเทคโนโลยีสารสนเทศ\ปี4เทอม1\diabetes-risk-prediction\frontend\src\pages\Upload.jsx
 function Upload() {
   const [file, setFile] = useState(null);
   const [datasets, setDatasets] = useState([]);

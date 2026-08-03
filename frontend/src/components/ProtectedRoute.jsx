@@ -1,10 +1,26 @@
+// frontend/src/components/ProtectedRoute.jsx
+
 import { Navigate } from "react-router-dom";
-//D:\IT29401 โครงงานทางเทคโนโลยีสารสนเทศ\ปี4เทอม1\diabetes-risk-prediction\frontend\src\components\ProtectedRoute.jsx
-function ProtectedRoute({ children }) {
+
+function ProtectedRoute({ children, role = null }) {
   const token = localStorage.getItem("token");
 
-  if (!token) {
+  const user = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user"));
+    } catch {
+      return null;
+    }
+  })();
+
+  // ยังไม่ล็อกอิน
+  if (!token || !user) {
     return <Navigate to="/login" replace />;
+  }
+
+  // ถ้ากำหนด role แล้ว แต่ role ไม่ตรง
+  if (role && user.role !== role) {
+    return <Navigate to="/" replace />;
   }
 
   return children;

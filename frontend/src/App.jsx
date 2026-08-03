@@ -13,68 +13,45 @@ import ModelInformation from "./pages/ModelInformation";
 import Articles from "./pages/Articles";
 import Knowledge from "./pages/Knowledge";
 import Login from "./pages/Login";
-import ProtectedRoute from "./components/ProtectedRoute";
+import Register from "./pages/Register";
 import Users from "./pages/Users";
+
+import ProtectedRoute from "./components/ProtectedRoute";
+import PublicRoute from "./components/PublicRoute";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         {/* Public */}
-        <Route path="/login" element={<Login />} />
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/register"
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          }
+        />
+
+        {/* Guest + User + Admin เข้าได้ */}
+        <Route path="/" element={<Dashboard />} />
         <Route path="/knowledge" element={<Knowledge />} />
 
-        {/* Protected */}
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/upload"
-          element={
-            <ProtectedRoute>
-              <Upload />
-            </ProtectedRoute>
-          }
-        />
-
+        {/* User + Admin */}
         <Route
           path="/predict"
           element={
             <ProtectedRoute>
               <Predict />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/train"
-          element={
-            <ProtectedRoute>
-              <Train />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/models"
-          element={
-            <ProtectedRoute>
-              <Models />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/training-history"
-          element={
-            <ProtectedRoute>
-              <TrainingHistory />
             </ProtectedRoute>
           }
         />
@@ -89,15 +66,6 @@ function App() {
         />
 
         <Route
-          path="/model-information"
-          element={
-            <ProtectedRoute>
-              <ModelInformation />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
           path="/articles"
           element={
             <ProtectedRoute>
@@ -106,9 +74,60 @@ function App() {
           }
         />
 
-        <Route path="/login" element={<Login />} />
-        <Route path="/users" element={<Users />} />
+        {/* Admin only */}
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute role="admin">
+              <Users />
+            </ProtectedRoute>
+          }
+        />
 
+        <Route
+          path="/upload"
+          element={
+            <ProtectedRoute role="admin">
+              <Upload />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/train"
+          element={
+            <ProtectedRoute role="admin">
+              <Train />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/models"
+          element={
+            <ProtectedRoute role="admin">
+              <Models />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/model-information"
+          element={
+            <ProtectedRoute role="admin">
+              <ModelInformation />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/training-history"
+          element={
+            <ProtectedRoute role="admin">
+              <TrainingHistory />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );

@@ -349,7 +349,7 @@
 
 .result-low  { background: linear-gradient(135deg, #96ab7d, #eaf3de); }
 .result-high { background: linear-gradient(135deg, #fcebeb, #f8cccc); }
-
+/* D:\IT29401 โครงงานทางเทคโนโลยีสารสนเทศ\ปี4เทอม1\diabetes-risk-prediction\frontend\src\App.css */
 .result-pct {
   font-size: 64px;
   font-weight: 700;

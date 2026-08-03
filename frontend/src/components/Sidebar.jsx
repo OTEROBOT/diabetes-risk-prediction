@@ -12,9 +12,11 @@ import {
   FaNewspaper,
   FaBook,
   FaSignOutAlt,
+  FaUsers,
+  FaSignInAlt,
+  FaUserPlus,
 } from "react-icons/fa";
 import { NavLink, useNavigate } from "react-router-dom";
-import { FaUsers } from "react-icons/fa";
 
 function Sidebar() {
   const navigate = useNavigate();
@@ -26,6 +28,11 @@ function Sidebar() {
       return null;
     }
   })();
+
+  const token = localStorage.getItem("token");
+  const role = user?.role || null;
+  const isLogin = !!token && !!user;
+  const isAdmin = role === "admin";
 
   const menuClass = ({ isActive }) =>
     `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
@@ -41,8 +48,6 @@ function Sidebar() {
     navigate("/login");
   };
 
-  // ... ส่วนที่เหลือเหมือนเดิม
-
   return (
     <aside className="fixed left-0 top-0 w-64 h-screen bg-slate-900 shadow-2xl flex flex-col">
       {/* Logo */}
@@ -53,60 +58,86 @@ function Sidebar() {
 
       {/* Menu */}
       <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
+        {/* ทุกคนเห็น */}
         <NavLink to="/" end className={menuClass}>
           <FaHome />
           <span>Dashboard</span>
-        </NavLink>
-
-        <NavLink to="/users" className={menuClass}>
-          <FaUsers />
-          <span>Users</span>
-        </NavLink>
-
-        <NavLink to="/upload" className={menuClass}>
-          <FaDatabase />
-          <span>Upload Dataset</span>
-        </NavLink>
-
-        <NavLink to="/predict" className={menuClass}>
-          <FaHeartbeat />
-          <span>Predict</span>
-        </NavLink>
-
-        <NavLink to="/train" className={menuClass}>
-          <FaRobot />
-          <span>Train Model</span>
-        </NavLink>
-
-        <NavLink to="/models" className={menuClass}>
-          <FaBrain />
-          <span>Models</span>
-        </NavLink>
-
-        <NavLink to="/model-information" className={menuClass}>
-          <FaInfoCircle />
-          <span>Model Information</span>
-        </NavLink>
-
-        <NavLink to="/training-history" className={menuClass}>
-          <FaChartBar />
-          <span>Training History</span>
-        </NavLink>
-
-        <NavLink to="/prediction-history" className={menuClass}>
-          <FaHistory />
-          <span>Prediction History</span>
-        </NavLink>
-
-        <NavLink to="/articles" className={menuClass}>
-          <FaNewspaper />
-          <span>Articles</span>
         </NavLink>
 
         <NavLink to="/knowledge" className={menuClass}>
           <FaBook />
           <span>Knowledge</span>
         </NavLink>
+
+        {/* ยังไม่ล็อกอิน */}
+        {!isLogin && (
+          <>
+            <NavLink to="/login" className={menuClass}>
+              <FaSignInAlt />
+              <span>Login</span>
+            </NavLink>
+
+            <NavLink to="/register" className={menuClass}>
+              <FaUserPlus />
+              <span>Register</span>
+            </NavLink>
+          </>
+        )}
+
+        {/* User + Admin */}
+        {isLogin && (
+          <>
+            <NavLink to="/predict" className={menuClass}>
+              <FaHeartbeat />
+              <span>Predict</span>
+            </NavLink>
+
+            <NavLink to="/prediction-history" className={menuClass}>
+              <FaHistory />
+              <span>Prediction History</span>
+            </NavLink>
+
+            <NavLink to="/articles" className={menuClass}>
+              <FaNewspaper />
+              <span>Articles</span>
+            </NavLink>
+          </>
+        )}
+
+        {/* Admin only */}
+        {isAdmin && (
+          <>
+            <NavLink to="/users" className={menuClass}>
+              <FaUsers />
+              <span>Users</span>
+            </NavLink>
+
+            <NavLink to="/upload" className={menuClass}>
+              <FaDatabase />
+              <span>Upload Dataset</span>
+            </NavLink>
+
+            <NavLink to="/train" className={menuClass}>
+              <FaRobot />
+              <span>Train Model</span>
+            </NavLink>
+
+            <NavLink to="/models" className={menuClass}>
+              <FaBrain />
+              <span>Models</span>
+            </NavLink>
+
+            <NavLink to="/model-information" className={menuClass}>
+              <FaInfoCircle />
+              <span>Model Information</span>
+            </NavLink>
+
+            <NavLink to="/training-history" className={menuClass}>
+              <FaChartBar />
+              <span>Training History</span>
+            </NavLink>
+          </>
+        )}
       </nav>
 
       {/* Footer */}
@@ -120,16 +151,26 @@ function Sidebar() {
         </div>
 
         <div className="text-cyan-400 text-sm mt-1">
-          Role : {user?.role || "-"}
+          Role : {role || "guest"}
         </div>
 
-        <button
-          onClick={logout}
-          className="mt-5 w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition"
-        >
-          <FaSignOutAlt />
-          Logout
-        </button>
+        {isLogin ? (
+          <button
+            onClick={logout}
+            className="mt-5 w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition"
+          >
+            <FaSignOutAlt />
+            Logout
+          </button>
+        ) : (
+          <button
+            onClick={() => navigate("/login")}
+            className="mt-5 w-full flex items-center justify-center gap-2 bg-cyan-600 hover:bg-cyan-700 text-white py-2 rounded-lg transition"
+          >
+            <FaSignInAlt />
+            Login
+          </button>
+        )}
 
         <div className="text-gray-500 text-xs mt-4 text-center">
           Version 1.0

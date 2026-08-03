@@ -14,6 +14,9 @@ import {
   FaStethoscope,
   FaList,
   FaRobot,
+  FaSignInAlt,
+  FaBook,
+  FaUserPlus,
 } from "react-icons/fa";
 
 function Dashboard() {
@@ -40,40 +43,52 @@ function Dashboard() {
   const [trendData, setTrendData] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // ===== Role =====
+  const user = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user"));
+    } catch {
+      return null;
+    }
+  })();
+
+  const token = localStorage.getItem("token");
+  const isLogin = !!token && !!user;
+  const isAdmin = user?.role === "admin";
+
   const loadDashboard = async (showLoading = true) => {
-  if (showLoading) setLoading(true);
+    if (showLoading) setLoading(true);
 
-  try {
-    const [dashboardRes, trendRes] = await Promise.all([
-      fetch("http://127.0.0.1:5000/dashboard"),
-      fetch("http://127.0.0.1:5000/prediction_trend"),
-    ]);
+    try {
+      const [dashboardRes, trendRes] = await Promise.all([
+        fetch("http://127.0.0.1:5000/dashboard"),
+        fetch("http://127.0.0.1:5000/prediction_trend"),
+      ]);
 
-    const dashboardData = await dashboardRes.json();
-    const trend = await trendRes.json();
+      const dashboardData = await dashboardRes.json();
+      const trend = await trendRes.json();
 
-    setDashboard((prev) => ({
-      ...prev,
-      ...dashboardData,
-    }));
-    setTrendData(trend);
-  } catch (err) {
-    console.error(err);
-  } finally {
-    if (showLoading) setLoading(false);
-  }
-};
+      setDashboard((prev) => ({
+        ...prev,
+        ...dashboardData,
+      }));
+      setTrendData(trend);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      if (showLoading) setLoading(false);
+    }
+  };
 
   useEffect(() => {
-  loadDashboard();
+    loadDashboard();
 
-  // Auto refresh ทุก 10 วินาที
-  const interval = setInterval(() => {
-    loadDashboard(false); // ไม่โชว์ skeleton ตอน auto refresh
-  }, 10000);
+    const interval = setInterval(() => {
+      loadDashboard(false);
+    }, 10000);
 
-  return () => clearInterval(interval);
-}, []);
+    return () => clearInterval(interval);
+  }, []);
 
   const formatPercentage = (value) => {
     if (value === null || value === undefined) return "0.00";
@@ -322,50 +337,95 @@ function Dashboard() {
         </p>
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Actions ตามสิทธิ์ */}
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <h3 className="text-xl font-bold text-slate-800 mb-6">Quick Actions</h3>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link
-            to="/upload"
-            className="flex flex-col items-center justify-center gap-3 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl p-6 transition group"
-          >
-            <div className="bg-blue-600 text-white p-4 rounded-full group-hover:scale-110 transition">
-              <FaUpload size={24} />
-            </div>
-            <span className="font-semibold text-blue-700">Upload Dataset</span>
-          </Link>
+          {/* Guest */}
+          {!isLogin && (
+            <>
+              <Link
+                to="/login"
+                className="flex flex-col items-center justify-center gap-3 bg-cyan-50 hover:bg-cyan-100 border border-cyan-200 rounded-xl p-6 transition group"
+              >
+                <div className="bg-cyan-600 text-white p-4 rounded-full group-hover:scale-110 transition">
+                  <FaSignInAlt size={24} />
+                </div>
+                <span className="font-semibold text-cyan-700">Login</span>
+              </Link>
 
-          <Link
-            to="/train"
-            className="flex flex-col items-center justify-center gap-3 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl p-6 transition group"
-          >
-            <div className="bg-purple-600 text-white p-4 rounded-full group-hover:scale-110 transition">
-              <FaCogs size={24} />
-            </div>
-            <span className="font-semibold text-purple-700">Train Model</span>
-          </Link>
+              <Link
+                to="/register"
+                className="flex flex-col items-center justify-center gap-3 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-xl p-6 transition group"
+              >
+                <div className="bg-indigo-600 text-white p-4 rounded-full group-hover:scale-110 transition">
+                  <FaUserPlus size={24} />
+                </div>
+                <span className="font-semibold text-indigo-700">Register</span>
+              </Link>
 
-          <Link
-            to="/predict"
-            className="flex flex-col items-center justify-center gap-3 bg-green-50 hover:bg-green-100 border border-green-200 rounded-xl p-6 transition group"
-          >
-            <div className="bg-green-600 text-white p-4 rounded-full group-hover:scale-110 transition">
-              <FaStethoscope size={24} />
-            </div>
-            <span className="font-semibold text-green-700">Predict</span>
-          </Link>
+              <Link
+                to="/knowledge"
+                className="flex flex-col items-center justify-center gap-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl p-6 transition group"
+              >
+                <div className="bg-emerald-600 text-white p-4 rounded-full group-hover:scale-110 transition">
+                  <FaBook size={24} />
+                </div>
+                <span className="font-semibold text-emerald-700">Knowledge</span>
+              </Link>
+            </>
+          )}
 
-          <Link
-            to="/models"
-            className="flex flex-col items-center justify-center gap-3 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-xl p-6 transition group"
-          >
-            <div className="bg-orange-600 text-white p-4 rounded-full group-hover:scale-110 transition">
-              <FaRobot size={24} />
-            </div>
-            <span className="font-semibold text-orange-700">View Models</span>
-          </Link>
+          {/* User + Admin */}
+          {isLogin && (
+            <Link
+              to="/predict"
+              className="flex flex-col items-center justify-center gap-3 bg-green-50 hover:bg-green-100 border border-green-200 rounded-xl p-6 transition group"
+            >
+              <div className="bg-green-600 text-white p-4 rounded-full group-hover:scale-110 transition">
+                <FaStethoscope size={24} />
+              </div>
+              <span className="font-semibold text-green-700">Predict</span>
+            </Link>
+          )}
+
+          {/* Admin only */}
+          {isAdmin && (
+            <>
+              <Link
+                to="/upload"
+                className="flex flex-col items-center justify-center gap-3 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl p-6 transition group"
+              >
+                <div className="bg-blue-600 text-white p-4 rounded-full group-hover:scale-110 transition">
+                  <FaUpload size={24} />
+                </div>
+                <span className="font-semibold text-blue-700">
+                  Upload Dataset
+                </span>
+              </Link>
+
+              <Link
+                to="/train"
+                className="flex flex-col items-center justify-center gap-3 bg-purple-50 hover:bg-purple-100 border border-purple-200 rounded-xl p-6 transition group"
+              >
+                <div className="bg-purple-600 text-white p-4 rounded-full group-hover:scale-110 transition">
+                  <FaCogs size={24} />
+                </div>
+                <span className="font-semibold text-purple-700">Train Model</span>
+              </Link>
+
+              <Link
+                to="/models"
+                className="flex flex-col items-center justify-center gap-3 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded-xl p-6 transition group"
+              >
+                <div className="bg-orange-600 text-white p-4 rounded-full group-hover:scale-110 transition">
+                  <FaRobot size={24} />
+                </div>
+                <span className="font-semibold text-orange-700">View Models</span>
+              </Link>
+            </>
+          )}
         </div>
       </div>
     </Layout>

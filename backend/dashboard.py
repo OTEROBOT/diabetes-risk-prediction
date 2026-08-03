@@ -5,7 +5,7 @@ import json
 
 dashboard_api = Blueprint("dashboard_api", __name__)
 
-
+#D:\IT29401 โครงงานทางเทคโนโลยีสารสนเทศ\ปี4เทอม1\diabetes-risk-prediction\backend\dashboard.py
 @dashboard_api.route("/dashboard")
 def dashboard():
     conn = get_db()
