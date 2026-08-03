@@ -1,6 +1,6 @@
 import { useState } from "react";
 import axios from "axios";
-
+//D:\IT29401 โครงงานทางเทคโนโลยีสารสนเทศ\ปี4เทอม1\diabetes-risk-prediction\frontend\src\pages\Register.jsx
 function Register() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");

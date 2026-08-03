@@ -1,4 +1,4 @@
-// D:\IT29401 โครงงานทางเทคโนโลยีสารสนเทศ\ปี4เทอม1\diabetes-risk-prediction\frontend\src\components\Sidebar.jsx
+// frontend/src/components/Sidebar.jsx
 
 import {
   FaHome,
@@ -10,11 +10,23 @@ import {
   FaChartBar,
   FaInfoCircle,
   FaNewspaper,
+  FaBook,
+  FaSignOutAlt,
 } from "react-icons/fa";
-import { NavLink } from "react-router-dom";
-import { FaBook } from "react-icons/fa";
+import { NavLink, useNavigate } from "react-router-dom";
+import { FaUsers } from "react-icons/fa";
 
 function Sidebar() {
+  const navigate = useNavigate();
+
+  const user = (() => {
+    try {
+      return JSON.parse(localStorage.getItem("user"));
+    } catch {
+      return null;
+    }
+  })();
+
   const menuClass = ({ isActive }) =>
     `flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200
     ${
@@ -22,6 +34,14 @@ function Sidebar() {
         ? "bg-cyan-500 text-white shadow-lg"
         : "text-gray-300 hover:bg-slate-800 hover:text-cyan-400"
     }`;
+
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
+  // ... ส่วนที่เหลือเหมือนเดิม
 
   return (
     <aside className="fixed left-0 top-0 w-64 h-screen bg-slate-900 shadow-2xl flex flex-col">
@@ -36,6 +56,11 @@ function Sidebar() {
         <NavLink to="/" end className={menuClass}>
           <FaHome />
           <span>Dashboard</span>
+        </NavLink>
+
+        <NavLink to="/users" className={menuClass}>
+          <FaUsers />
+          <span>Users</span>
         </NavLink>
 
         <NavLink to="/upload" className={menuClass}>
@@ -82,16 +107,33 @@ function Sidebar() {
           <FaBook />
           <span>Knowledge</span>
         </NavLink>
-
       </nav>
 
       {/* Footer */}
       <div className="border-t border-slate-700 p-5">
-        <div className="text-white font-semibold">👤 Administrator</div>
-        <div className="text-gray-400 text-sm mt-1">
-          Diabetes Prediction System
+        <div className="text-white font-semibold">
+          👤 {user?.username || "Guest"}
         </div>
-        <div className="text-gray-500 text-xs mt-2">Version 1.0</div>
+
+        <div className="text-gray-400 text-sm mt-1">
+          {user?.email || "-"}
+        </div>
+
+        <div className="text-cyan-400 text-sm mt-1">
+          Role : {user?.role || "-"}
+        </div>
+
+        <button
+          onClick={logout}
+          className="mt-5 w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg transition"
+        >
+          <FaSignOutAlt />
+          Logout
+        </button>
+
+        <div className="text-gray-500 text-xs mt-4 text-center">
+          Version 1.0
+        </div>
       </div>
     </aside>
   );

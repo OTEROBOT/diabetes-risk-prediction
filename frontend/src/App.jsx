@@ -14,6 +14,7 @@ import Articles from "./pages/Articles";
 import Knowledge from "./pages/Knowledge";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Users from "./pages/Users";
 
 function App() {
   return (
@@ -106,6 +107,7 @@ function App() {
         />
 
         <Route path="/login" element={<Login />} />
+        <Route path="/users" element={<Users />} />
 
       </Routes>
     </BrowserRouter>

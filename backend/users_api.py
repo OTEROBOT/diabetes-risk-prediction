@@ -1,7 +1,10 @@
+# backend/users_api.py
+
 from flask import Blueprint, request, jsonify
 import sqlite3
 import os
-#D:\IT29401 โครงงานทางเทคโนโลยีสารสนเทศ\ปี4เทอม1\diabetes-risk-prediction\backend\users_api.py
+import bcrypt
+
 users_bp = Blueprint("users", __name__)
 
 DATABASE = os.path.join(os.path.dirname(__file__), "diabetes.db")
@@ -18,7 +21,6 @@ def get_db():
 # ==========================
 @users_bp.route("/users", methods=["GET"])
 def get_users():
-
     conn = get_db()
     cursor = conn.cursor()
 
@@ -44,7 +46,6 @@ def get_users():
 # ==========================
 @users_bp.route("/users/<int:id>", methods=["GET"])
 def get_user(id):
-
     conn = get_db()
     cursor = conn.cursor()
 
@@ -56,7 +57,7 @@ def get_user(id):
             role,
             created_at
         FROM users
-        WHERE id=?
+        WHERE id = ?
     """, (id,))
 
     row = cursor.fetchone()
@@ -76,8 +77,7 @@ def get_user(id):
 # ==========================
 @users_bp.route("/users", methods=["POST"])
 def create_user():
-
-    data = request.get_json()
+    data = request.get_json() or {}
 
     username = data.get("username")
     email = data.get("email")
@@ -93,34 +93,42 @@ def create_user():
     conn = get_db()
     cursor = conn.cursor()
 
-    try:
+    # เช็ค email ซ้ำ
+    cursor.execute(
+        "SELECT id FROM users WHERE email = ?",
+        (email,)
+    )
 
+    if cursor.fetchone():
+        conn.close()
+        return jsonify({
+            "success": False,
+            "message": "Email already exists"
+        }), 400
+
+    hashed = bcrypt.hashpw(
+        password.encode("utf-8"),
+        bcrypt.gensalt()
+    ).decode("utf-8")
+
+    try:
         cursor.execute("""
-            INSERT INTO users
-            (
+            INSERT INTO users (
                 username,
                 email,
                 password,
                 role
             )
-            VALUES
-            (
-                ?,
-                ?,
-                ?,
-                ?
-            )
+            VALUES (?, ?, ?, ?)
         """, (
             username,
             email,
-            password,
+            hashed,
             role
         ))
 
         conn.commit()
-
         user_id = cursor.lastrowid
-
         conn.close()
 
         return jsonify({
@@ -130,9 +138,7 @@ def create_user():
         })
 
     except sqlite3.IntegrityError:
-
         conn.close()
-
         return jsonify({
             "success": False,
             "message": "Email already exists"
@@ -144,37 +150,83 @@ def create_user():
 # ==========================
 @users_bp.route("/users/<int:id>", methods=["PUT"])
 def update_user(id):
-
-    data = request.get_json()
+    data = request.get_json() or {}
 
     username = data.get("username")
     email = data.get("email")
     role = data.get("role")
+    password = data.get("password")
+
+    if not username or not email or not role:
+        return jsonify({
+            "success": False,
+            "message": "Username, Email and Role are required"
+        }), 400
 
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        UPDATE users
-        SET
-            username=?,
-            email=?,
-            role=?
-        WHERE id=?
-    """, (
-        username,
-        email,
-        role,
-        id
-    ))
+    cursor.execute("SELECT id FROM users WHERE id = ?", (id,))
+    row = cursor.fetchone()
 
-    conn.commit()
-    conn.close()
+    if row is None:
+        conn.close()
+        return jsonify({
+            "success": False,
+            "message": "User not found"
+        }), 404
 
-    return jsonify({
-        "success": True,
-        "message": "User updated successfully"
-    })
+    try:
+        if password:
+            hashed = bcrypt.hashpw(
+                password.encode("utf-8"),
+                bcrypt.gensalt()
+            ).decode("utf-8")
+
+            cursor.execute("""
+                UPDATE users
+                SET
+                    username = ?,
+                    email = ?,
+                    role = ?,
+                    password = ?
+                WHERE id = ?
+            """, (
+                username,
+                email,
+                role,
+                hashed,
+                id
+            ))
+        else:
+            cursor.execute("""
+                UPDATE users
+                SET
+                    username = ?,
+                    email = ?,
+                    role = ?
+                WHERE id = ?
+            """, (
+                username,
+                email,
+                role,
+                id
+            ))
+
+        conn.commit()
+        conn.close()
+
+        return jsonify({
+            "success": True,
+            "message": "User updated successfully"
+        })
+
+    except sqlite3.IntegrityError:
+        conn.close()
+        return jsonify({
+            "success": False,
+            "message": "Email already exists"
+        }), 400
 
 
 # ==========================
@@ -182,15 +234,20 @@ def update_user(id):
 # ==========================
 @users_bp.route("/users/<int:id>", methods=["DELETE"])
 def delete_user(id):
-
     conn = get_db()
     cursor = conn.cursor()
 
-    cursor.execute("""
-        DELETE FROM users
-        WHERE id=?
-    """, (id,))
+    cursor.execute("SELECT id FROM users WHERE id = ?", (id,))
+    row = cursor.fetchone()
 
+    if row is None:
+        conn.close()
+        return jsonify({
+            "success": False,
+            "message": "User not found"
+        }), 404
+
+    cursor.execute("DELETE FROM users WHERE id = ?", (id,))
     conn.commit()
     conn.close()
 
